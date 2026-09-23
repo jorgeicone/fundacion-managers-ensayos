@@ -30,7 +30,10 @@ const DESTINOS: Record<string, { repo: string; workflow: string; rama: string }>
     rama: 'main',
   },
   ensayos: {
-    repo: 'FundacionManagers/fundacion-managers-ensayos',
+    // Vive bajo la cuenta personal y no bajo la organizacion porque la
+    // cuenta que opera esto es colaboradora del repo, no miembro de la
+    // organizacion con permiso para crear repositorios.
+    repo: 'jorgeicone/fundacion-managers-ensayos',
     workflow: 'deploy.yml',
     rama: 'main',
   },

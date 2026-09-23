@@ -5,9 +5,9 @@ repositorios. Sirven para probar cambios sin arriesgar el sitio real.
 
 | | Producción | Ensayos |
 |---|---|---|
-| Web | https://fundacionmanagers.com | https://fundacionmanagers.github.io/fundacion-managers-ensayos/ |
+| Web | https://fundacionmanagers.com | https://jorgeicone.github.io/fundacion-managers-ensayos/ |
 | Panel | `/resultados/` de esa web | `/resultados/` de esa web |
-| Repositorio | `fundacion-managers-fuente` | `fundacion-managers-ensayos` |
+| Repositorio | `FundacionManagers/fundacion-managers-fuente` | `jorgeicone/fundacion-managers-ensayos` |
 | Edición en la base | 4 (la real) | 99 (copia sandbox) |
 | Aviso en pantalla | ninguno | franja naranja fija en todas las páginas |
 
@@ -53,7 +53,7 @@ git push origin main
 El remoto `ensayos` se añade una sola vez:
 
 ```bash
-git remote add ensayos https://github.com/FundacionManagers/fundacion-managers-ensayos.git
+git remote add ensayos https://github.com/jorgeicone/fundacion-managers-ensayos.git
 ```
 
 `HEAD:main` empuja la rama en la que estés a `main` del repositorio de
