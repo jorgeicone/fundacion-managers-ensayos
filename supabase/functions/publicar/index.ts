@@ -15,9 +15,26 @@
  * de los datos del torneo.
  */
 
-const REPO = 'FundacionManagers/fundacion-managers-fuente';
-const WORKFLOW = 'deploy.yml';
-const RAMA = 'main';
+/**
+ * A donde dispara cada entorno.
+ *
+ * Es una lista blanca, no un parametro libre: el navegador dice "ensayos" o
+ * "produccion" y nada mas. Si llegara un repositorio arbitrario en el
+ * cuerpo, cualquiera con sesion de admin podria usar este token para
+ * disparar workflows en otros repositorios de la organizacion.
+ */
+const DESTINOS: Record<string, { repo: string; workflow: string; rama: string }> = {
+  produccion: {
+    repo: 'FundacionManagers/fundacion-managers-fuente',
+    workflow: 'deploy.yml',
+    rama: 'main',
+  },
+  ensayos: {
+    repo: 'FundacionManagers/fundacion-managers-ensayos',
+    workflow: 'deploy.yml',
+    rama: 'main',
+  },
+};
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -37,6 +54,20 @@ Deno.serve(async (req) => {
 
   const autorizacion = req.headers.get('Authorization');
   if (!autorizacion) return responder(401, { error: 'Falta la sesión.' });
+
+  // ── Qué sitio hay que publicar ─────────────────────────────────────
+  // Sin cuerpo, producción: es como llamaban las versiones anteriores del
+  // panel y no deben dejar de funcionar por desplegarse en otro orden.
+  let entorno = 'produccion';
+  try {
+    const cuerpo = await req.json();
+    if (typeof cuerpo?.entorno === 'string') entorno = cuerpo.entorno;
+  } catch {
+    // Cuerpo vacío o no-JSON: se queda en producción.
+  }
+
+  const destino = DESTINOS[entorno];
+  if (!destino) return responder(400, { error: `Entorno desconocido: ${entorno}.` });
 
   const urlSupabase = Deno.env.get('SUPABASE_URL');
   const claveAnon = Deno.env.get('SUPABASE_ANON_KEY');
@@ -75,7 +106,7 @@ Deno.serve(async (req) => {
 
   // ── Disparar el despliegue ─────────────────────────────────────────
   const githubRes = await fetch(
-    `https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
+    `https://api.github.com/repos/${destino.repo}/actions/workflows/${destino.workflow}/dispatches`,
     {
       method: 'POST',
       headers: {
@@ -85,19 +116,21 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         'User-Agent': 'fundacion-managers-panel',
       },
-      body: JSON.stringify({ ref: RAMA }),
+      body: JSON.stringify({ ref: destino.rama }),
     },
   );
 
   // GitHub responde 204 sin cuerpo cuando acepta el disparo.
   if (githubRes.status === 204) {
-    return responder(200, { ok: true, mensaje: 'Despliegue iniciado.', por: correo });
+    return responder(200, { ok: true, mensaje: 'Despliegue iniciado.', por: correo, entorno });
   }
 
   const detalle = await githubRes.text();
   // Queda en los registros de la funcion: sin esto, un fallo aqui solo se ve
   // como un 502 opaco y hay que adivinar si fue token, permiso o ruta.
-  console.error(`[publicar] GitHub ${githubRes.status}: ${detalle.slice(0, 200)}`);
+  console.error(
+    `[publicar] ${entorno} → GitHub ${githubRes.status}: ${detalle.slice(0, 200)}`,
+  );
   return responder(502, {
     error: 'GitHub rechazó el disparo.',
     estado: githubRes.status,

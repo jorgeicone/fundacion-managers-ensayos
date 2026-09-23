@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CloudUpload, Globe, HelpCircle, Loader2, Rocket } from 'lucide-react';
 import { asset } from '@/lib/asset';
+import { EDICION_DATOS, ENTORNO, ES_ENSAYOS } from '@/lib/entorno';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -63,9 +64,12 @@ export function EstadoPublicacion() {
         return setEstado({ tipo: 'desconocido' });
       }
 
+      // Solo la marca de ESTA edición: producción y ensayos comparten base,
+      // y con la marca global cada sitio veía los cambios del otro.
       const { data, error } = await supabase
-        .from('torneo_marca')
+        .from('torneo_marca_edicion')
         .select('ultimo_cambio, filas')
+        .eq('edicion', EDICION_DATOS)
         .maybeSingle();
       if (error || !data) return setEstado({ tipo: 'desconocido' });
 
@@ -100,7 +104,12 @@ export function EstadoPublicacion() {
     setPublicando(true);
     setAviso('');
     setFallo('');
-    const { error } = await supabase.functions.invoke('publicar', { body: {} });
+    // El entorno viaja en el cuerpo: la función sabe a qué repositorio
+    // disparar. Sin esto, «Publicar ahora» desde ensayos recompilaba la web
+    // real, que es exactamente lo que este entorno existe para evitar.
+    const { error } = await supabase.functions.invoke('publicar', {
+      body: { entorno: ENTORNO },
+    });
     setPublicando(false);
 
     if (error) {
@@ -125,7 +134,11 @@ export function EstadoPublicacion() {
       setFallo(detalle || 'No se pudo iniciar el despliegue.');
       return;
     }
-    setAviso('Despliegue iniciado. El sitio se actualiza en un par de minutos.');
+    setAviso(
+      ES_ENSAYOS
+        ? 'Despliegue del sitio de ensayos iniciado. Se actualiza en un par de minutos.'
+        : 'Despliegue iniciado. El sitio se actualiza en un par de minutos.',
+    );
     // Se vuelve a mirar pasado un rato, cuando ya deberia haber terminado.
     setTimeout(() => void revisar(), 150_000);
   }

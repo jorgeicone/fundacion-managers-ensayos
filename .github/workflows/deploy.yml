@@ -1,5 +1,17 @@
 name: Desplegar web (GitHub Pages)
 
+# El MISMO archivo sirve para los dos sitios —produccion y el de ensayos—.
+# Lo que cambia entre ellos son las variables del repositorio
+# (Settings -> Secrets and variables -> Actions -> Variables):
+#
+#   ENTORNO          produccion | ensayos       (por defecto: produccion)
+#   EDICION          4 | 99                     (por defecto: 4)
+#   PAGES_BASE_PATH  '' | /fundacion-managers-ensayos
+#
+# Asi los dos repositorios pueden tener el fichero identico y sincronizarse
+# con un `git push` sin conflictos. Un workflow duplicado a mano se habria
+# separado del original en la segunda semana.
+#
 # Se publica en tres casos:
 #   - push a main: cambios de codigo o de imagenes.
 #   - cada 15 minutos: por si el panel de administracion cambio datos en
@@ -53,7 +65,7 @@ jobs:
         id: leer
         run: |
           RESPUESTA=$(curl -sS --max-time 30 \
-            "${SUPABASE_URL}/rest/v1/torneo_marca?select=*" \
+            "${SUPABASE_URL}/rest/v1/torneo_marca_edicion?select=*&edicion=eq.${EDICION}" \
             -H "apikey: ${SUPABASE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_KEY}" || echo '')
           if [ -z "$RESPUESTA" ]; then
@@ -68,6 +80,7 @@ jobs:
           # vista solo devuelve una fecha y un conteo.
           SUPABASE_URL: https://rlgakgpcfbwhigjdumiv.supabase.co
           SUPABASE_KEY: sb_publishable_VJ4JIosQfATwORGErcb0Dw_VxcrSngy
+          EDICION: ${{ vars.EDICION || '4' }}
 
       # La cache hace de registro de "esto ya se publico". Si la clave existe,
       # este mismo estado ya salio al aire y no hay nada que hacer.
@@ -77,7 +90,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .marca
-          key: torneo-publicado-${{ steps.leer.outputs.marca }}
+          key: torneo-publicado-${{ vars.EDICION || '4' }}-${{ steps.leer.outputs.marca }}
           lookup-only: true
 
       - name: Decidir
@@ -120,8 +133,18 @@ jobs:
       - name: Build estático
         env:
           GITHUB_PAGES: 'true'
-          PAGES_BASE_PATH: ''
+          PAGES_BASE_PATH: ${{ vars.PAGES_BASE_PATH || '' }}
+          NEXT_PUBLIC_ENTORNO: ${{ vars.ENTORNO || 'produccion' }}
+          NEXT_PUBLIC_EDICION: ${{ vars.EDICION || '4' }}
         run: npm run build
+
+      # El CNAME de public/ reclama fundacionmanagers.com. En el sitio de
+      # ensayos eso le disputaria el dominio a la web real, asi que se
+      # borra del artefacto: la replica vive en la URL de github.io.
+      - name: Quitar el dominio propio fuera de producción
+        if: vars.ENTORNO == 'ensayos'
+        run: rm -f out/CNAME
+
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -148,4 +171,4 @@ jobs:
         uses: actions/cache/save@v6
         with:
           path: .marca
-          key: torneo-publicado-${{ needs.revisar.outputs.marca }}
+          key: torneo-publicado-${{ vars.EDICION || '4' }}-${{ needs.revisar.outputs.marca }}

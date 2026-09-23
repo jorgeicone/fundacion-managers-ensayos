@@ -20,11 +20,20 @@ const CLAVE =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   'sb_publishable_VJ4JIosQfATwORGErcb0Dw_VxcrSngy';
 
+// La edicion que se esta compilando. Produccion y el sitio de ensayos
+// comparten base y cada uno tiene que mirar solo la suya: con la marca
+// global, un marcador de prueba obligaba a republicar la web real.
+const EDICION = Number(process.env.NEXT_PUBLIC_EDICION) || 4;
+const ENTORNO = process.env.NEXT_PUBLIC_ENTORNO === 'ensayos' ? 'ensayos' : 'produccion';
+
 async function leerMarca() {
   try {
-    const r = await fetch(`${URL_SUPABASE}/rest/v1/torneo_marca?select=*`, {
-      headers: { apikey: CLAVE, Authorization: `Bearer ${CLAVE}` },
-    });
+    const r = await fetch(
+      `${URL_SUPABASE}/rest/v1/torneo_marca_edicion?select=*&edicion=eq.${EDICION}`,
+      {
+        headers: { apikey: CLAVE, Authorization: `Bearer ${CLAVE}` },
+      },
+    );
     if (!r.ok) return null;
     const filas = await r.json();
     return filas?.[0] ?? null;
@@ -36,6 +45,8 @@ async function leerMarca() {
 const marca = await leerMarca();
 const info = {
   publicado_en: new Date().toISOString(),
+  entorno: ENTORNO,
+  edicion: EDICION,
   // null si Supabase no respondió: el panel lo interpreta como "no se puede
   // comparar" en vez de afirmar que todo está publicado.
   ultimo_cambio: marca?.ultimo_cambio ?? null,
@@ -45,7 +56,7 @@ const info = {
 const destino = join(process.cwd(), 'out', 'build-info.json');
 await writeFile(destino, JSON.stringify(info, null, 2), 'utf8');
 console.log(
-  `[build-info] ${info.publicado_en} · ${
+  `[build-info] ${ENTORNO} · edición ${EDICION} · ${info.publicado_en} · ${
     marca ? `${info.filas} filas, último cambio ${info.ultimo_cambio}` : 'sin marca de Supabase'
   }`,
 );

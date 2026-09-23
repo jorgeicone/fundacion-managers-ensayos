@@ -8,7 +8,8 @@
  */
 
 import { supabase } from './supabase';
-import { EDICION_ACTUAL, type FaseFinal } from './liga';
+import { EDICION_DATOS } from './entorno';
+import { type FaseFinal } from './liga';
 
 /** Ronda a la que pertenece un partido: la liga o una ronda eliminatoria. */
 export type FasePartido = 'grupos' | FaseFinal;
@@ -55,7 +56,7 @@ function exigirCliente() {
   return supabase;
 }
 
-export async function cargarTodo(edicion = EDICION_ACTUAL): Promise<EstadoTorneo> {
+export async function cargarTodo(edicion = EDICION_DATOS): Promise<EstadoTorneo> {
   const sb = exigirCliente();
 
   const [p, d, g] = await Promise.all([
@@ -167,7 +168,7 @@ export interface NuevoCruce {
  * programado y sin marcador, que es lo unico que admite
  * `marcador_coherente`.
  */
-export async function crearCruce(c: NuevoCruce, edicion = EDICION_ACTUAL): Promise<void> {
+export async function crearCruce(c: NuevoCruce, edicion = EDICION_DATOS): Promise<void> {
   const sb = exigirCliente();
   const { error } = await sb.from('partidos').insert({
     edicion,
@@ -194,7 +195,7 @@ export async function eliminarPartido(id: string): Promise<void> {
 
 export async function guardarDisciplina(
   filas: DisciplinaPanel[],
-  edicion = EDICION_ACTUAL,
+  edicion = EDICION_DATOS,
 ): Promise<void> {
   const sb = exigirCliente();
   const { error } = await sb.from('disciplina').upsert(
@@ -211,7 +212,7 @@ export async function guardarDisciplina(
 
 export async function crearGoleador(
   g: Omit<GoleadorPanel, 'id'>,
-  edicion = EDICION_ACTUAL,
+  edicion = EDICION_DATOS,
 ): Promise<void> {
   const sb = exigirCliente();
   const { error } = await sb.from('goleadores').insert({

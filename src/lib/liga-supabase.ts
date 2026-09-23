@@ -17,6 +17,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { EDICION_DATOS } from './entorno';
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigurado } from './supabase';
 import {
   DISCIPLINA,
@@ -96,7 +97,7 @@ interface FilaGoleador {
  * Trae la edición indicada. Devuelve el respaldo ante cualquier problema:
  * sin cliente configurado, error de red, o tablas vacías.
  */
-export async function cargarLiga(edicion = 4): Promise<DatosLiga> {
+export async function cargarLiga(edicion = EDICION_DATOS): Promise<DatosLiga> {
   if (!supabaseConfigurado) return RESPALDO;
 
   /**
@@ -195,7 +196,7 @@ export async function cargarLiga(edicion = 4): Promise<DatosLiga> {
  * Igual que `cargarLiga`, pero deja constancia en el log del build de qué
  * fuente se usó. Si un despliegue sale con datos viejos, el log lo dice.
  */
-export async function cargarLigaConAviso(edicion = 4): Promise<DatosLiga> {
+export async function cargarLigaConAviso(edicion = EDICION_DATOS): Promise<DatosLiga> {
   const datos = await cargarLiga(edicion);
   const detalle = `${datos.partidos.length} partidos, ${datos.goleadores.length} goleadores`;
   if (datos.origen === 'supabase') {

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AvisoEnsayos } from '@/components/shared/AvisoEnsayos';
 import { bebasNeue, fredoka, inter, jakarta, jetbrainsMono, playfair } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import './globals.css';
@@ -92,7 +93,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: REENVIO_AUTH }} />
       </head>
-      <body className="min-h-dvh font-body">{children}</body>
+      <body className="min-h-dvh font-body">
+        {/* Va en el layout raíz, no en el del torneo: el aviso tiene que
+            salir en TODAS las páginas de la réplica, el panel incluido. */}
+        <AvisoEnsayos />
+        {children}
+      </body>
     </html>
   );
 }
