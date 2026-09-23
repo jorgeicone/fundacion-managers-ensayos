@@ -16,7 +16,12 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/resultados/', '/inscripciones/'],
+      // `panel.html` y `caracterizacion.html` son paneles internos que viven
+      // sueltos en public/. Llevan `noindex` en el HTML, que evita que
+      // aparezcan en los resultados pero no evita el rastreo: se gasta
+      // presupuesto en ellos y quedan en los registros de cualquier
+      // rastreador. El Disallow los saca del camino.
+      disallow: ['/resultados/', '/inscripciones/', '/panel.html', '/caracterizacion.html'],
     },
     sitemap: `${SITIO}/sitemap.xml`,
   };

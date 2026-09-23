@@ -43,7 +43,7 @@ export default async function EjePage({ params }: EjePageProps) {
     <div className="relative">
       <SectionBackdrop
         tint={vis.tint}
-        image={`/fotos/seccion-${eje.slug}.jpg`}
+        image={`/fotos/seccion-${eje.slug}.webp`}
         wide={['turismo', 'eventos', 'emprendimiento', 'rural'].includes(eje.slug)}
       />
       <div className="relative z-10 text-neutral-200">

@@ -42,7 +42,7 @@ const VALORES = [
 export default function NosotrosPage() {
   return (
     <div className="relative">
-      <SectionBackdrop tint="#D4A437" image="/fotos/seccion-nosotros.jpg" />
+      <SectionBackdrop tint="#D4A437" image="/fotos/seccion-nosotros.webp" />
       <div className="relative z-10 text-neutral-200">
         {/* HERO */}
         <section className="grain relative overflow-hidden">

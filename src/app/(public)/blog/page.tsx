@@ -13,7 +13,7 @@ export default function BlogPage() {
         eyebrow="Blog"
         title="Ideas y aprendizajes"
         description="Aquí compartiremos historias, análisis y miradas desde los ejes de la fundación."
-        image="/fotos/seccion-blog.jpg"
+        image="/fotos/seccion-blog.webp"
       />
       <section className="canvas-cream grain relative overflow-hidden">
         <div className="relative mx-auto max-w-3xl px-6 py-24 lg:px-8">
@@ -23,8 +23,8 @@ export default function BlogPage() {
                 que a quien visita no le dice nada y deja el sitio con aire de
                 obra sin terminar. Lo que si le sirve es qué va a encontrar. */}
             <p className="mt-4 text-neutral-600">
-              Estamos preparando los primeros artículos: análisis firmados, organizados por pilar y
-              con suscripción por correo. Mientras tanto, lo que pasa en la fundación se sigue en{' '}
+              Estamos preparando los primeros artículos: análisis firmados y organizados por pilar.
+              Mientras tanto, lo que pasa en la fundación se sigue en{' '}
               <a
                 href="https://instagram.com/torneo_managers"
                 target="_blank"

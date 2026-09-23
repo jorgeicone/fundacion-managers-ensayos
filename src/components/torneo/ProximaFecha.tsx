@@ -74,7 +74,9 @@ export function ProximaFecha({ compromiso }: { compromiso: Compromiso }) {
       </h3>
       <p className="mt-1 text-sm text-neutral-400">
         {etiqueta}
-        {partidos.length ? ` · ${partidos.length} partidos desde las ${horas[0]}` : ''}
+        {partidos.length
+          ? ` · ${partidos.length} ${partidos.length === 1 ? 'partido' : 'partidos'} desde las ${horas[0]}`
+          : ''}
       </p>
 
       {/* Los cruces con su hora. Esta fecha ya no se repite abajo en el

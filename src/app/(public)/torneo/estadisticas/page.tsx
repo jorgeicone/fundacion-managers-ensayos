@@ -41,7 +41,11 @@ export default async function EstadisticasPage() {
 
   const posiciones = calcularPosiciones(datos.partidos, datos.disciplina);
   const juegoLimpio = tablaJuegoLimpio(posiciones);
-  const cifras = cifrasDeEdicion(datos.partidos);
+  // La edicion son las siete fechas MAS la fase final. Pasar solo
+  // `datos.partidos` dejaba fuera los ocho cruces eliminatorios: la pagina
+  // titulaba «como va la cuarta» con las cifras de la fase de grupos y, una
+  // semana despues de cuartos y semifinales, se comia 19 goles y 6 partidos.
+  const cifras = cifrasDeEdicion([...datos.partidos, ...datos.eliminatoria]);
   const defensa = mejorDefensa(posiciones);
 
   const goleado = cifras.masGoleado;
@@ -129,8 +133,11 @@ export default async function EstadisticasPage() {
               className="group col-span-2 rounded-2xl border border-white/10 bg-black/30 p-5 transition-colors hover:border-amarillo/40 lg:col-span-1"
             >
               <p className="font-sport text-4xl leading-none text-amarillo">{defensa.gc}</p>
+              {/* Acotada a proposito: sale de la tabla de posiciones, que es
+                  de la fase regular. Sin el «en la fase de grupos» era un
+                  superlativo falso en cuanto empezo la eliminatoria. */}
               <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
-                Goles en contra · la valla menos vencida
+                Goles en contra en la fase de grupos · la valla menos vencida
               </p>
               <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-neutral-200">
                 <TeamCrest slug={defensa.equipo} size={22} />

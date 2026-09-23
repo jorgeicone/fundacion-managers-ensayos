@@ -685,6 +685,38 @@ export interface Compromiso {
   cruces?: readonly CruceCuartos[];
 }
 
+/**
+ * Deja la Gran Final delante del tercer puesto cuando los dos caen el mismo
+ * dia y ninguno se ha jugado.
+ *
+ * Por reloj el tercer puesto va primero —arranca antes— y `ORDEN_FASES` lo
+ * respeta. Como titular de la portada, no: a cuatro dias de la final el
+ * sitio anunciaba «Tercer puesto» y no decia en ninguna parte a que hora se
+ * juega el titulo. Solo afecta a que se anuncia como lo proximo; el cuadro
+ * de la llave conserva su orden.
+ */
+function ordenarConLaFinalPrimeroSiComparteDia(
+  calendario: readonly RondaFinal[],
+  eliminatoria: readonly PartidoEliminatoria[],
+): readonly RondaFinal[] {
+  const diaDe = (fase: FaseFinal) =>
+    eliminatoria.find((p) => p.fase === fase)?.fecha ??
+    calendario.find((r) => r.fase === fase)?.fecha;
+
+  const tercero = diaDe('tercer-puesto');
+  const final = diaDe('final');
+  if (!tercero || !final || tercero !== final) return calendario;
+
+  const yaSeJugo = (fase: FaseFinal) =>
+    eliminatoria.some((p) => p.fase === fase && p.estado === 'jugado');
+  if (yaSeJugo('tercer-puesto') || yaSeJugo('final')) return calendario;
+
+  const resto = calendario.filter((r) => r.fase !== 'final' && r.fase !== 'tercer-puesto');
+  const laFinal = calendario.filter((r) => r.fase === 'final');
+  const elTercero = calendario.filter((r) => r.fase === 'tercer-puesto');
+  return [...resto, ...laFinal, ...elTercero];
+}
+
 export function proximoCompromiso(
   partidos: readonly PartidoLiga[],
   eliminatoria: readonly PartidoEliminatoria[] = [],
@@ -706,7 +738,7 @@ export function proximoCompromiso(
   }
 
   // 2 y 3. La primera ronda de la final que aún no se ha jugado entera.
-  for (const ronda of CALENDARIO_FASE_FINAL) {
+  for (const ronda of ordenarConLaFinalPrimeroSiComparteDia(CALENDARIO_FASE_FINAL, eliminatoria)) {
     const suyos = eliminatoria.filter((p) => p.fase === ronda.fase);
     const pendiente = suyos.length === 0 || suyos.some((p) => p.estado === 'programado');
     if (!pendiente) continue;
@@ -1150,8 +1182,15 @@ export function caminoFaseFinal(eliminatoria: readonly PartidoEliminatoria[] = [
   return ORDEN_FASES.filter((f) => anunciadas.has(f) || cargadas.has(f)).map((fase) => {
     const suyos = eliminatoria.filter((p) => p.fase === fase);
     const jugados = suyos.filter((p) => p.estado === 'jugado').length;
+    // Una ronda con los cruces cargados pero sin ningun partido jugado sigue
+    // PENDIENTE. Decia «En juego» desde el momento de crear el cruce: el
+    // sitio afirmaba que habia futbol en curso cuatro dias antes del partido.
     const estado: EstadoRonda =
-      suyos.length === 0 ? 'pendiente' : jugados === suyos.length ? 'jugada' : 'en-juego';
+      suyos.length === 0 || jugados === 0
+        ? 'pendiente'
+        : jugados === suyos.length
+          ? 'jugada'
+          : 'en-juego';
 
     return {
       fase,

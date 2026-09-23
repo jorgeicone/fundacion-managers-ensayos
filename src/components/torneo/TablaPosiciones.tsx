@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import { TeamCrest } from '@/components/torneo/TeamCrest';
-import { getEquipo } from '@/lib/torneo-data';
+import { EQUIPOS, getEquipo } from '@/lib/torneo-data';
 import {
   COLUMNAS_TABLA,
   CRITERIOS_DESEMPATE,
@@ -164,7 +164,7 @@ export function TablaPosiciones({ datos }: { datos: DatosLiga }) {
             aria-hidden
             className="shrink-0 transition-transform duration-200 group-open:rotate-90"
           />
-          Qué significan las siglas y cómo se desempata
+          Qué significan las siglas, quién es cada club y cómo se desempata
         </summary>
 
         <div className="border-t border-white/5 px-5 pb-5 pt-4">
@@ -173,6 +173,24 @@ export function TablaPosiciones({ datos }: { datos: DatosLiga }) {
               <div key={c.key} className="flex gap-1.5">
                 <dt className="font-bold text-neutral-400">{c.corto}:</dt>
                 <dd>{c.largo}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {/* Los codigos de los clubes, que faltaban. En movil la columna de
+              equipo muestra solo la sigla —decision deliberada: a 375 px el
+              nombre completo se comia la columna de PTS— pero la leyenda
+              explicaba PJ, PG y PE y en ninguna parte decia que TPA es
+              Tranquilo Papi. */}
+          <p className="mt-5 font-bufon text-xs font-bold uppercase tracking-[0.2em] text-amarillo">
+            Los clubes
+          </p>
+          <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-neutral-500">
+            {EQUIPOS.map((eq) => (
+              <div key={eq.slug} className="flex items-center gap-1.5">
+                <TeamCrest slug={eq.slug} size={18} />
+                <dt className="font-bold text-neutral-400">{eq.corto}:</dt>
+                <dd>{eq.nombre}</dd>
               </div>
             ))}
           </dl>

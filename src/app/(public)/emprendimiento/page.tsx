@@ -50,7 +50,7 @@ export default function EmprendimientoPage() {
 
   return (
     <div className="relative">
-      <SectionBackdrop tint={vis.tint} image="/fotos/seccion-emprendimiento.jpg" wide />
+      <SectionBackdrop tint={vis.tint} image="/fotos/seccion-emprendimiento.webp" wide />
       <div className="relative z-10 text-neutral-200">
         {/* HERO */}
         <section className="grain relative overflow-hidden">

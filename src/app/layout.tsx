@@ -66,10 +66,20 @@ export const metadata: Metadata = {
  * Va inline en el <head> para que corra antes de pintar: nadie alcanza a ver
  * la página equivocada.
  */
+/**
+ * Ojo con la lista de exenciones: `/resultados/` monta su propia puerta y
+ * escucha `onAuthStateChange`, asi que el cliente de Supabase consume el
+ * fragmento solo. Reenviarla rompia su acceso por enlace al correo —el
+ * enlace mágico volvia a `/resultados/#access_token=…` y este script lo
+ * sacaba de ahi antes de pintar—, y dejaba sin ninguna forma de entrar a
+ * quien no hubiera fijado contrasena.
+ */
 const REENVIO_AUTH = `(function(){try{
 var h=location.hash||'';
 if(!/(^|[#&])(access_token|error_code|error_description)=/.test(h))return;
-if(location.pathname.indexOf('panel.html')>-1)return;
+var p=location.pathname;
+if(p.indexOf('panel.html')>-1)return;
+if(/^\/resultados(\/|$)/.test(p))return;
 location.replace('/panel.html'+h);
 }catch(e){}})();`;
 

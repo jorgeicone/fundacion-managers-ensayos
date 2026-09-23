@@ -18,7 +18,7 @@ export function Footer() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url('${asset('/fotos/seccion-nosotros.jpg')}')`,
+          backgroundImage: `url('${asset('/fotos/seccion-nosotros.webp')}')`,
           filter: 'saturate(0.75) brightness(0.5)',
           opacity: 0.28,
           WebkitMaskImage:

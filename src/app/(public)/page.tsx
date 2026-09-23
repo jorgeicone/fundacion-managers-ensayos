@@ -16,7 +16,7 @@ import {
 export default function HomePage() {
   return (
     <div className="relative">
-      <SectionBackdrop tint="#D4A437" image="/fotos/seccion-home.jpg" />
+      <SectionBackdrop tint="#D4A437" image="/fotos/seccion-home.webp" />
 
       <div className="relative z-10 text-neutral-200">
         {/* ===== HERO ===== */}
