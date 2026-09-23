@@ -73,13 +73,19 @@ export const metadata: Metadata = {
  * enlace mágico volvia a `/resultados/#access_token=…` y este script lo
  * sacaba de ahi antes de pintar—, y dejaba sin ninguna forma de entrar a
  * quien no hubiera fijado contrasena.
+ *
+ * Sin expresion regular a proposito: esto vive dentro de una plantilla de
+ * JavaScript, y la plantilla se come la barra invertida de `\/`. El script
+ * salia al HTML como `/^/resultados(/|$)/`, que es un error de sintaxis, y
+ * mataba el reenvio entero sin que nada lo avisara. Dos comparaciones de
+ * cadena no se pueden romper asi.
  */
 const REENVIO_AUTH = `(function(){try{
 var h=location.hash||'';
 if(!/(^|[#&])(access_token|error_code|error_description)=/.test(h))return;
 var p=location.pathname;
 if(p.indexOf('panel.html')>-1)return;
-if(/^\/resultados(\/|$)/.test(p))return;
+if(p==='/resultados/'||p==='/resultados')return;
 location.replace('/panel.html'+h);
 }catch(e){}})();`;
 
